@@ -1,0 +1,41 @@
+﻿<div class="d-flex flex-row align-items-center">
+    <span class="oi oi-caret-left p-1" @onclick="PrevDay" style="cursor: pointer;"></span>
+    <input type="date" @bind-value="SelectedDate"/>
+    <span class="oi oi-caret-right p-1" @onclick="NextDay" style="cursor: pointer;"></span>
+</div>
+
+@*<InputDate></InputDate> //Select specific date*@
+
+@code {
+    [Parameter]
+    public DateOnly SelectedDate { get; set; } = DateOnly.FromDateTime(DateTime.Now.Date);
+    [Parameter]
+    public EventCallback<DateOnly> SelectedDateChanged { get; set; }
+
+
+    private void PrevDay()
+    {
+        SetSelectedDate(SelectedDate.AddDays(-1));
+    }
+    private void PrevWeek()
+    {
+        SetSelectedDate(SelectedDate.AddDays(-7));
+    }
+    private void NextDay ()
+    {
+        SetSelectedDate(SelectedDate.AddDays(1));
+    }
+    private void NextWeek()
+    {
+        SetSelectedDate(SelectedDate.AddDays(7));
+    }
+
+
+
+    private void SetSelectedDate(DateOnly date)
+    {
+        SelectedDate = date;
+        SelectedDateChanged.InvokeAsync(date);
+    }
+
+}

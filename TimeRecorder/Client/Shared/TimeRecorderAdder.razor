@@ -1,0 +1,46 @@
+﻿@using TimeRecorder.Shared.Models;
+
+<h3>Add new recording</h3>
+<div class="row">
+    <div class="col">
+    </div>
+    <div class="col">
+        <input type="time" @bind-value="Start"/>
+    </div>
+    <div class="col">
+        <input type="time" @bind-value="End" />
+    </div>
+    <div class="col">
+        <p>@Duration</p>
+    </div>
+    <div class="col">
+        <input type="text" @bind-value="Description" />
+    </div>
+    <div class="col">
+        <input type="button" value="Add" @onclick="AddRecording"/>
+    </div>
+</div>
+@code {
+    [Parameter, EditorRequired]
+    public IEnumerable<TimeRecording> TimeRecordings { get; set; } = new TimeRecording[0];
+    [Parameter]
+    public EventCallback<IEnumerable<TimeRecording>> TimeRecordingsChanged { get; set; }
+    [Parameter, EditorRequired]
+    public DateOnly Date { get; set; }
+
+    private TimeOnly Start;
+    private TimeOnly End;
+    private string Duration => (End - Start).ToString();
+    private string Description = "";
+
+
+    private void AddRecording()
+    {
+        Console.WriteLine(Date);
+        TimeRecordings = TimeRecordings.Append(new TimeRecording(Start, End, Date, Description));
+        Start = TimeOnly.MinValue;
+        End = TimeOnly.MinValue;
+        Description = "";
+        TimeRecordingsChanged.InvokeAsync(TimeRecordings);
+    }
+}

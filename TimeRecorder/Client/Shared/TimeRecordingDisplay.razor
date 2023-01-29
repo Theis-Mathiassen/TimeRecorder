@@ -1,0 +1,95 @@
+﻿@using TimeRecorder.Shared.Models;
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+        </div>
+        <div class="col">
+            <p>Start</p>
+        </div>
+        <div class="col">
+            <p>End</p>
+        </div>
+        <div class="col">
+            <p>Time</p>
+        </div>
+        <div class="col">
+            <p>Description</p>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+    @foreach (var item in CorrectDateTimeRecordings)
+    {
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col">
+                <p>@item.Start.ToShortTimeString()</p>
+            </div>
+            <div class="col">
+                <p>@item.End.ToShortTimeString()</p>
+            </div>
+            <div class="col">
+                <p>@item.GetDuration()</p>
+            </div>
+            <div class="col">
+                <p>@item.Description</p>
+            </div>
+            <div class="col">
+                <span class="oi oi-delete" @onclick="()=>{DeleteRecording(item);}" style="cursor: pointer;"></span>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col">
+            <p>Total:</p>
+        </div>
+        <div class="col">
+        </div>
+        <div class="col">
+        </div>
+        <div class="col">
+            <p>@Total</p>
+        </div>
+        <div class="col">
+        </div>
+        <div class="col">
+        </div>
+    </div>
+    <br />
+    
+
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IEnumerable<TimeRecording> TimeRecordings { get; set; } = new TimeRecording[0];
+    [Parameter]
+    public EventCallback<IEnumerable<TimeRecording>> TimeRecordingsChanged { get; set; }
+    [Parameter, EditorRequired]
+    public DateOnly Date { get; set; }
+
+    private IEnumerable<TimeRecording> CorrectDateTimeRecordings => from TimeRecording in TimeRecordings
+                                                                    where TimeRecording.Date.Equals(Date)
+                                                                    select TimeRecording;
+    private TimeSpan Total {
+        get
+        {
+            TimeSpan TotalDuration = new();
+            foreach (var record in CorrectDateTimeRecordings) {
+                TotalDuration += record.GetDuration();
+            }
+            return TotalDuration;
+        }
+    }
+
+    private void DeleteRecording (TimeRecording recording)
+    {
+        TimeRecordings = TimeRecordings.Where(item => item.Equals(recording) == false);
+        TimeRecordingsChanged.InvokeAsync(TimeRecordings);
+    }
+
+
+    
+}

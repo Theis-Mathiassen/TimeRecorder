@@ -1,0 +1,42 @@
+﻿@using TimeRecorder.Shared.Models
+@using System.Text.Json;
+@inject IJSRuntime JSRuntime;
+@page "/"
+
+<h3>Time tracker</h3>
+<DateSelector @bind-SelectedDate="SelectedDate"></DateSelector>
+<TimeRecordingDisplay Date="SelectedDate" TimeRecordings="TimeRecordings" TimeRecordingsChanged="TimeRecordingsChanged"></TimeRecordingDisplay>
+<TimeRecorderAdder Date="SelectedDate" TimeRecordings="TimeRecordings" TimeRecordingsChanged="TimeRecordingsChanged"></TimeRecorderAdder>
+
+@code {
+    List<TimeRecording> TimeRecordings = new();
+    DateOnly SelectedDate = DateOnly.FromDateTime(DateTime.Now);
+
+    private void TimeRecordingsChanged (IEnumerable<TimeRecording> timeRecordings)
+    {
+        TimeRecordings = timeRecordings.ToList();
+        SetData("TimeRecordings", JsonSerializer.Serialize<List<TimeRecording>>(TimeRecordings));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string data = await GetData("TimeRecordings");
+        if (data != null)
+        {
+            TimeRecordings = JsonSerializer.Deserialize<List<TimeRecording>>(data) ?? new();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task SetData(string key, string value)
+    {
+        await JSRuntime.InvokeAsync<object>("localStorage.setItem", key, value);
+    }
+
+    private async Task<string> GetData(string key)
+    {
+        Console.WriteLine("Hello");
+        return await JSRuntime.InvokeAsync<string>("localStorage.getItem", key);
+    }
+}
